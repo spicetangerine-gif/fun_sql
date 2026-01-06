@@ -394,41 +394,33 @@ SELECT *
 FROM gift;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 SELECT count(*) FROM ;
-
-
-
-
-
-
-
 
 
 SELECT *
 FROM p_grade;
 
 
-
-
 UPDATE emp2
 SET    birthday = ADD_MONTHS(birthday, 5)
 WHERE 1=1;
 
-
+-- 문제6)
+SELECT e1.empno
+      ,e1.ename 
+      ,e1.hiredate
+      -- e2정보.
+      --,e2.empno
+      --,e2.ename
+      --,e2.hiredate
+      ,count(e2.empno) count 
+FROM emp e1
+LEFT OUTER JOIN emp e2
+ON e1.hiredate > e2.hiredate
+GROUP BY e1.empno
+        ,e1.ename 
+        ,e1.hiredate
+ORDER BY 4;
 
 
 
