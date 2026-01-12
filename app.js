@@ -4,19 +4,58 @@ const db = require("./db");
 
 const app = express(); // 인스턴스 생성.
 
+app.use(express.static("public"));
+app.use(express.json());
+
 // URL 주소 - 실행함수 => 라우팅.
 // "/"
 app.get("/", (req, res) => {
   res.send("/ 양현규 홈에 오신걸 환영합니다.");
 });
 
-// "/customer"
-app.get("/customer", (req, res) => {
-  res.send("/customer 경로가 호출됨.");
+// 댓글 삭제 기능.
+// 요청방식(get) - '/remove_board/:board_no'
+// 반환되는 결과 ( {retCode: 'ok' or 'NG'})
+// const board_no = req.params.board_no;
+
+// 댓글 전체 목록을 반환.
+app.get("/boards", async (req, res) => {
+  const qry = "select * from board order by 1";
+  try {
+    const connection = await db.getConnection();
+    const result = await connection.execute(qry);
+    console.log("성공");
+    res.send(result.rows);
+  } catch (err) {
+    console.log(err);
+    res.send("실패");
+  }
 });
 
-app.get("/product", (req, res) => {
-  res.send("/product 경로가 호출됨.");
+// 요청방식 GET vs. POST
+// get : 단순조회.
+// post : 많은 양의 전달.
+app.post("/add_board", async (req, res) => {
+  const { board_no, title, content, writer } = req.body;
+  const qry = `insert into board (board_no, title, content, writer)
+               values(:board_no, :title, :content, :writer)`;
+  try {
+    const connection = await db.getConnection();
+    const result = await connection.execute(qry, [
+      board_no,
+      title,
+      content,
+      writer,
+    ]);
+    console.log(result); // { lastRowid: 'AAAS2RAAHAAAAN/AAB', rowsAffected: 1 }
+    connection.commit();
+    // res.send("처리완료"); // 서버 -> 클라이언트 응답 결과.
+    res.json({ board_no, title, content, writer });
+  } catch (err) {
+    console.log(err);
+    // res.send("처리중 에러");
+    res.json({ retCode: "NG", retMsg: "DB 에러" });
+  }
 });
 
 // "/student" -> 화면에 출력.
@@ -29,9 +68,8 @@ app.get("/student/:studno", async (req, res) => {
   res.send(result.rows); // 반환되는 결과값에서 rows 속성의 결과만.
 });
 
-// '/emplyee' -> 사언목록을 출력하는 라우팅.
+// '/emplyee' -> 사원목록을 출력하는 라우팅.
 app.get("/employee/:empno", async (req, res) => {
-  console.log(req.params.empno);
   const empno = req.params.empno;
   const qry = "select * from emp where empno = " + empno;
   const connection = await db.getConnection();
