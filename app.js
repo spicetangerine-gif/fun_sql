@@ -79,5 +79,5 @@ app.get("/employee/:empno", async (req, res) => {
 
 // 서버실행.
 app.listen(3000, () => {
-  console.log("sever 실행. http://localhost:3000");
+  console.log("server 실행. http://localhost:3000");
 });
